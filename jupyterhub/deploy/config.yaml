@@ -1,0 +1,317 @@
+singleuser:
+  networkPolicy:
+    enabled: false
+  extraTolerations:
+  - key: "node-role.kubernetes.io/control-plane"
+    operator: "Exists"
+    effect: "NoSchedule"
+  startTimeout: 600
+  storage:
+    homeMountPath: /home/{username}
+    capacity: 100Gi
+    type: dynamic
+    dynamic:
+      storageClass: longhorn
+  extraEnv:
+    CHOWN_HOME: 'yes'
+    CHOWN_HOME_OPTS: '-R'
+  uid: 0
+  memory:
+    limit: 32G
+    guarantee: 4G
+  cpu:
+    limit: 8
+    guarantee: 4
+  defaultUrl: "/lab"
+  extraEnv:
+    JUPYTERHUB_SINGLEUSER_APP: "jupyter_server.serverapp.ServerApp"
+  # Defines the default image
+  image:
+    name: jupyter/base-notebook
+    tag: x86_64-python-3.11.6
+  profileList:
+    - display_name: "Pythorch Env"
+      description: "pytorch environment"
+      slug: "training-python"
+      default: true
+      profile_options:
+        image:
+          display_name: "Application"
+          choices:
+            pytorch1:
+              display_name: "pytorch2.0.1 cuda11.7 qlora"
+              kubespawner_override:
+                image: registry.cn-hangzhou.aliyuncs.com/linuzb/scipy-notebook:python-3.11-523d2ac
+                # image: jupyter/base-notebook:x86_64-python-3.11.6
+            pytorch2:
+              display_name: "pytorch2.2.1 cuda11 mimo"
+              kubespawner_override:
+                image: registry.cn-hangzhou.aliyuncs.com/linuzb/pytorch-notebook:cuda11-pytorch-2.2.1-5369881
+                # image: jupyter/base-notebook:x86_64-python-3.11.6
+        cpu_mem:
+          display_name: "CPU Memory Specification"
+          choices:
+            small:
+              display_name: "Small(CPU: 2, Memory: 4G)"
+              kubespawner_override:
+                cpu_limit : 2
+                mem_limit : 4G
+            medium:
+              display_name: "Medium(CPU: 4, Memory: 8G)"
+              kubespawner_override:
+                cpu_limit : 4
+                mem_limit : 8G
+            large:
+              display_name: "Large(CPU: 8, Memory: 16G)"
+              kubespawner_override:
+                cpu_limit : 8
+                mem_limit : 16G
+        gpu_number:
+          display_name: "GPU Number"
+          choices:
+            zero:
+              display_name: "0"
+              kubespawner_override:
+                extra_resource_limits:
+                  nvidia.com/gpu: "0"
+            one:
+              display_name: "1"
+              kubespawner_override:
+                extra_resource_limits:
+                  nvidia.com/gpu: "1"
+            two:
+              display_name: "2"
+              kubespawner_override:
+                extra_resource_limits:
+                  nvidia.com/gpu: "2"
+            three:
+              display_name: "3"
+              kubespawner_override:
+                extra_resource_limits:
+                  nvidia.com/gpu: "3"
+            four:
+              display_name: "4"
+              kubespawner_override:
+                extra_resource_limits:
+                  nvidia.com/gpu: "4"
+        gpu_type:
+          display_name: "GPU Type"
+          choices:
+            nvidia-geforce-rtx-4090:
+              display_name: "NVIDIA GeForce RTX 4090"
+              kubespawner_override:
+                node_selector:
+                  gpu-type: "nvidia-geforce-rtx-4090"
+            tesla-v100-sxm2-32gb:
+              display_name: "Tesla V100-SXM2-32GB"
+              kubespawner_override:
+                node_selector:
+                  gpu-type: "tesla-v100-sxm2-32gb"
+                volumes:
+                - name: satafs
+                  hostPath:
+                    # directory location on host
+                    path: /mnt/sdc
+                    # this field is optional
+                    type: Directory
+                volume_mounts:
+                - name: satafs
+                  mountPath: /data
+
+    - display_name: "Tensorflow Env"
+      description: "fake Tensorflow environment"
+      slug: "training-tensorflow"
+      default: true
+      profile_options:
+        image:
+          display_name: "Application"
+          choices:
+            pytorch0:
+              display_name: "pytorch1.12.0 cuda11.6"
+              kubespawner_override:
+                image: jupyter/base-notebook:x86_64-python-3.11.6
+                # image: registry.cn-hangzhou.aliyuncs.com/linuzb/pytorch-notebook:cuda11-pytorch-2.2.1-41776e2
+        cpu_mem:
+          display_name: "CPU Memory Specification"
+          choices:
+            small:
+              display_name: "Small(CPU: 2, Memory: 4G)"
+              kubespawner_override:
+                cpu_limit : 2
+                mem_limit : 4G
+            medium:
+              display_name: "Medium(CPU: 4, Memory: 8G)"
+              kubespawner_override:
+                cpu_limit : 4
+                mem_limit : 8G
+            large:
+              display_name: "Large(CPU: 8, Memory: 16G)"
+              kubespawner_override:
+                cpu_limit : 8
+                mem_limit : 16G
+        gpu_number:
+          display_name: "GPU Number"
+          choices:
+            zero:
+              display_name: "0"
+              kubespawner_override:
+                extra_resource_limits:
+                  nvidia.com/gpu: "0"
+            one:
+              display_name: "1"
+              kubespawner_override:
+                extra_resource_limits:
+                  nvidia.com/gpu: "1"
+            two:
+              display_name: "2"
+              kubespawner_override:
+                extra_resource_limits:
+                  nvidia.com/gpu: "2"
+            three:
+              display_name: "3"
+              kubespawner_override:
+                extra_resource_limits:
+                  nvidia.com/gpu: "3"
+            four:
+              display_name: "4"
+              kubespawner_override:
+                extra_resource_limits:
+                  nvidia.com/gpu: "4"
+        gpu_type:
+          display_name: "GPU Type"
+          choices:
+            nvidia-geforce-rtx-4090:
+              display_name: "NVIDIA GeForce RTX 4090"
+              kubespawner_override:
+                node_selector:
+                  gpu-type: "nvidia-geforce-rtx-4090"
+            tesla-v100-sxm2-32gb:
+              display_name: "Tesla V100-SXM2-32GB"
+              kubespawner_override:
+                node_selector:
+                  gpu-type: "tesla-v100-sxm2-32gb"
+
+hub:
+  extraConfig:
+    myConfig: |
+      from oauthenticator.github import GitHubOAuthenticator
+      from tornado import gen
+      import os
+      # import escapism
+      class CustomGitHubOAuthenticator(GitHubOAuthenticator):
+        @gen.coroutine
+        def pre_spawn_start(self, user, spawner):
+          auth_state = yield user.get_auth_state()
+          if not auth_state:
+                return
+
+          # setup environment
+          username = auth_state['github_user']['login'].lower()
+          spawner.environment['NB_USER'] = username
+
+
+      # enable authentication state
+      c.CustomGitHubOAuthenticator.enable_auth_state = True
+
+      c.GitHubOAuthenticator.oauth_callback_url = os.environ.get("OAUTH_CALLBACK_URL", "")
+      c.GitHubOAuthenticator.client_id = os.environ.get("GITHUB_CLIENT_ID", "")
+      c.GitHubOAuthenticator.client_secret = os.environ.get("GITHUB_CLIENT_SECRET", "")
+
+      # config authenticator_class
+      c.JupyterHub.authenticator_class = CustomGitHubOAuthenticator
+
+      # change users
+      c.KubeSpawner.cmd = ['start.sh','jupyterhub-singleuser']
+      c.KubeSpawner.args = ['--allow-root']
+
+  extraEnv:
+    # https://discourse.jupyter.org/t/hide-oauth-clientid-other-secrets/17529/2
+    GITHUB_CLIENT_ID:
+      valueFrom:
+        secretKeyRef:
+          name: githubsecret
+          key: clientId
+    GITHUB_CLIENT_SECRET:
+      valueFrom:
+        secretKeyRef:
+          name: githubsecret
+          key: clientSecret
+    OAUTH_CALLBACK_URL:
+      valueFrom:
+        secretKeyRef:
+          name: githubsecret
+          key: oauthCallbackUrl
+
+  networkPolicy:
+    enabled: false
+  config:
+    Authenticator:
+      admin_users:
+        - linuzb
+        - Dreamupers
+        - linuzboutlook
+      allowed_users:
+        - guest
+        - sunfangwei
+        - Alina-elena
+        - VisionVerse
+        - alondrajy
+        - hanyovladscarlet
+        - lcylmhlcy
+        - znafaith
+    JupyterHub:
+      admin_access: false
+  baseUrl: /
+  db:
+    type: sqlite-pvc
+    pvc:
+      accessModes:
+        - ReadWriteOnce
+      storage: 1Gi
+      storageClassName: nfs-client
+
+# scheduling relates to the user-scheduler pods and user-placeholder pods.
+scheduling:
+  userScheduler:
+    image:
+      name: registry.cn-hangzhou.aliyuncs.com/linuzb/kube-scheduler
+  userPlaceholder:
+    image:
+      name: registry.cn-hangzhou.aliyuncs.com/linuzb/pause
+
+# prePuller relates to the hook|continuous-image-puller DaemonsSets
+prePuller:
+  extraTolerations:
+  - key: "node-role.kubernetes.io/control-plane"
+    operator: "Exists"
+    effect: "NoSchedule"
+  pause:
+    image:
+      name: registry.cn-hangzhou.aliyuncs.com/linuzb/pause
+  hook:
+    enabled: true
+  continuous:
+    # NOTE: if used with a Cluster Autoscaler, also add user-placeholders
+    enabled: true
+
+# proxy relates to the proxy pod, the proxy-public service, and the autohttps
+# pod and proxy-http service.
+proxy:
+  service:
+    type: NodePort
+    nodePorts:
+      http: 30080
+
+# cull relates to the jupyterhub-idle-culler service, responsible for evicting
+# inactive singleuser pods.
+#
+# The configuration below, except for enabled, corresponds to command-line flags
+# for jupyterhub-idle-culler as documented here:
+# https://github.com/jupyterhub/jupyterhub-idle-culler#as-a-standalone-script
+#
+cull:
+  enabled: true
+  timeout: 604800 # --timeout 7d=604800s
+
+debug:
+  enabled: true
